@@ -17,6 +17,24 @@ exports.sendResponse = function(response, content, statusCode) {
 	response.end(content);
 };
 
+exports.sendRedirect = function(response, target, statusCode) {
+	response.writeHead(statusCode || 302, {Location: target});
+	console.log('IM HERE!!!!! setHeader');
+	response.end();
+};
+
+exports.collectData = function(req, callback){
+  var bufferToString = '';
+   
+  req.on('data', function(data) {
+  	bufferToString += data;
+  });
+
+  req.on('end', function(){
+    callback ? callback(bufferToString) : console.log('Callback Not provided');
+  });
+}
+
 exports.serveAssets = function(res, asset, callback) {
   // Write some code here that helps serve up your static files!
   // (Static files are things like html (yours or archived from others...), css, or anything that doesn't change often.)
