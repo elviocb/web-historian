@@ -10,10 +10,41 @@ exports.headers = headers = {
   'Content-Type': "text/html"
 };
 
+
+exports.sendResponse = function(response, content, statusCode) {
+	response.writeHead(statusCode || 200, headers);
+	// console.log('content',content);
+	response.end(content);
+};
+
 exports.serveAssets = function(res, asset, callback) {
   // Write some code here that helps serve up your static files!
   // (Static files are things like html (yours or archived from others...), css, or anything that doesn't change often.)
+  var publicFilePath = archive.paths.siteAssets + asset;
+  var archivesFilePath = archive.paths.archivedSites + asset;
+  var encoding = {encoding: 'utf8'};
+  
+  // 1. Check the public 
+  fs.readFile(publicFilePath, encoding, function(err, contents) {
+  	
+  	if (err) {
+	  	// 2. If it's not in the public, check the archives
+	  	fs.readFile(archivesFilePath, encoding, function(err, contents){
+	  		if (err) {
+	  		// 3. If it's not in the archives, send a 404
+	  			callback ? callback() : exports.sendResponse(res, 'File not found', 404);
+	  		} 
+        // If it's in the archives, serves it
+        exports.sendResponse(res, contents);
+	  	});
+  	} 
+    // if it's in the public, serves it.
+    exports.sendResponse(res, contents);
+
+  });
+
 };
+
 
 
 
